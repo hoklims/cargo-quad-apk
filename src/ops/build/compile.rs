@@ -187,8 +187,16 @@ impl Executor for SharedLibraryExecutor {
                 .replace("-", "_1")
                 .replace(".", "_");
 
-            let extra_code =
-                extra_code.replace("JAVA_CLASS_PATH", &format!("Java_{}", package_name));
+            let extra_code = extra_code
+                .replace("JAVA_CLASS_PATH", &format!("Java_{}", package_name))
+                // The injected glue (miniquad's mod_inject.rs) is compiled at the
+                // *user crate's* edition. In edition 2024 a bare `#[no_mangle]` is a
+                // hard error ("unsafe attribute used without unsafe"), so rewrite it
+                // to the `#[unsafe(no_mangle)]` spelling. That spelling is accepted
+                // in every edition on Rust >= 1.82, so edition-2021 crates keep
+                // building too. This is what lets cargo-quad-apk build edition-2024
+                // miniquad/macroquad projects.
+                .replace("#[no_mangle]", "#[unsafe(no_mangle)]");
 
             let tmp_file = TempFile::new(tmp_lib_filepath.clone(), |lib_src_file| {
                 writeln!( lib_src_file, "{}\n{}", original_contents, extra_code)?;

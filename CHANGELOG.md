@@ -16,6 +16,14 @@ behavior.
   *every* invocation (including `--help`) panicked with
   `command 'logcat' alias 'r' is duplicated`. Removed the stray alias from
   `logcat`. (`run` keeps `r`; `build` keeps `b`.)
+- **Edition-2024 user crates failed to build.** The tool injects miniquad's
+  `mod_inject.rs` glue (`#[no_mangle] pub extern "C" fn quad_main()`) into the
+  user's crate, where it is compiled at the *user crate's* edition. In edition
+  2024 a bare `#[no_mangle]` is a hard error (`unsafe attribute used without
+  unsafe`). The injector now rewrites it to `#[unsafe(no_mangle)]`, which is valid
+  in every edition on Rust ≥ 1.82 — so edition-2024 *and* edition-2021 projects
+  build. Verified end-to-end in CI by building an edition-2024 miniquad example
+  into an APK (see `test-project/` and the "Android APK" workflow).
 
 ### Changed
 
