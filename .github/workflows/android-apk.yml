@@ -1,0 +1,67 @@
+name: Android APK (end-to-end)
+
+# Real end-to-end validation: builds the bundled miniquad example (test-project)
+# into an actual signed .apk using cargo-quad-apk, on a clean Ubuntu runner with
+# a pinned NDK. The .apk is uploaded as a downloadable artifact.
+
+on:
+  push:
+    branches: ["**"]
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+  # NDK r25 has the layout this tool expects (unified `ld`, `llvm-ar`,
+  # `llvm-readelf`, and libunwind under lib64/clang/<ver>/lib/linux/<arch>).
+  NDK_VERSION: "25.2.9519653"
+
+jobs:
+  apk:
+    name: build real APK (aarch64-linux-android)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install toolchain (1.95 from rust-toolchain.toml) + Android target
+        run: |
+          rustup show
+          rustup default 1.95.0
+          rustup target add aarch64-linux-android
+
+      - name: Set up Android SDK + NDK r25
+        uses: android-actions/setup-android@v3
+        with:
+          packages: "platform-tools platforms;android-35 build-tools;35.0.0 ndk;${{ env.NDK_VERSION }}"
+
+      - name: Export NDK_HOME / ANDROID_HOME
+        run: |
+          echo "NDK_HOME=${ANDROID_SDK_ROOT}/ndk/${NDK_VERSION}" >> "$GITHUB_ENV"
+          echo "ANDROID_HOME=${ANDROID_SDK_ROOT}" >> "$GITHUB_ENV"
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Install cargo-quad-apk
+        run: cargo install --path .
+
+      - name: Build the APK (end-to-end)
+        working-directory: test-project
+        run: cargo quad-apk build
+
+      - name: Assert an APK was produced
+        working-directory: test-project
+        run: |
+          apk="$(find target/android-artifacts -name '*.apk' -print -quit)"
+          if [ -z "$apk" ]; then
+            echo "::error::No .apk was produced"
+            find target/android-artifacts -maxdepth 4 -type d || true
+            exit 1
+          fi
+          echo "Built APK: $apk"
+          ls -la "$apk"
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: quad-android-smoke-apk
+          path: test-project/target/android-artifacts/**/*.apk
+          if-no-files-found: error

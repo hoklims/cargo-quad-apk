@@ -1,5 +1,5 @@
-# Rust build artifacts
-/target
+# Rust build artifacts (root crate and the bundled test-project)
+target/
 **/*.rs.bk
 
 # Claude Code local cache

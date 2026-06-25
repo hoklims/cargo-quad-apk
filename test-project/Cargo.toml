@@ -1,0 +1,25 @@
+[package]
+name = "quad-android-smoke"
+version = "0.0.0"
+edition = "2024"
+publish = false
+# Standalone end-to-end validation target for cargo-quad-apk. Intentionally NOT a
+# workspace member of the tool (the tool builds *this* crate into an APK).
+
+[[bin]]
+name = "quad-android-smoke"
+path = "src/main.rs"
+
+[dependencies]
+miniquad = "0.4"
+
+# Consumed by cargo-quad-apk. Values chosen to match what the CI runner provides
+# (Android platform 35, NDK r25). build_targets is a single ABI to keep the
+# end-to-end APK build fast.
+[package.metadata.android]
+android_version = 35
+target_sdk_version = 35
+min_sdk_version = 26
+build_targets = ["aarch64-linux-android"]
+package_name = "rust.quad.smoke"
+label = "Quad Android Smoke"
