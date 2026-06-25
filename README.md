@@ -1,5 +1,8 @@
 # cargo-quad-apk (Rust 2024 compatible fork)
 
+[![CI](https://github.com/hoklims/cargo-quad-apk/actions/workflows/ci.yml/badge.svg)](https://github.com/hoklims/cargo-quad-apk/actions/workflows/ci.yml)
+[![Android APK](https://github.com/hoklims/cargo-quad-apk/actions/workflows/android-apk.yml/badge.svg)](https://github.com/hoklims/cargo-quad-apk/actions/workflows/android-apk.yml)
+
 A maintained, **Rust 2024 edition–compatible** fork of
 [`not-fl3/cargo-quad-apk`](https://github.com/not-fl3/cargo-quad-apk) — the cargo
 subcommand that builds Android `.apk` packages for
@@ -206,6 +209,40 @@ Upstream publishes a Docker image for reproducible builds:
 docker run --rm -v "$(pwd)":/root/src -w /root/src notfl3/cargo-apk \
   cargo quad-apk build --example quad
 ```
+
+## Validation
+
+This repo proves the full pipeline works, it does not just claim it:
+
+- **`test-project/`** is a minimal miniquad app written in **edition 2024**.
+- The **Android APK** workflow (`.github/workflows/android-apk.yml`) builds it into
+  a real, signed `.apk` on every push — on a clean Ubuntu runner, with NDK r25 and
+  the `aarch64-linux-android` target — then **uploads the APK as a downloadable
+  artifact**. Grab it from the latest green run on the
+  [Actions tab](https://github.com/hoklims/cargo-quad-apk/actions/workflows/android-apk.yml)
+  ("quad-android-smoke-apk").
+- The **CI** workflow builds + tests the tool and checks formatting on Linux and
+  Windows.
+
+> Scope: CI builds a debug APK for one ABI; it does not install or run it on a
+> device/emulator. Building the edition-2024 example end-to-end is what verifies
+> the JNI glue is injected in an edition-2024-safe way.
+
+### Validating locally
+
+You need the Android SDK + NDK (r25 recommended), a JDK, `zip` on `PATH`, and the
+Rust target:
+
+```sh
+rustup target add aarch64-linux-android
+export NDK_HOME=/path/to/android-sdk/ndk/25.2.9519653
+export ANDROID_HOME=/path/to/android-sdk
+cargo install --path .
+cd test-project
+cargo quad-apk build          # -> target/android-artifacts/debug/apk/*.apk
+```
+
+(On Windows the same applies; ensure a `zip` executable is on `PATH`.)
 
 ## Relationship to upstream & license
 
