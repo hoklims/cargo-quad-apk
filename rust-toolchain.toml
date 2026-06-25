@@ -1,0 +1,7 @@
+# The `cargo` library crate (a dependency of this tool) has NO stable API and is
+# pinned to a specific toolchain: crate `cargo 0.N` is built against Rust `1.N`.
+# This file pins the toolchain so `cargo build` always matches `cargo = "=0.95.0"`
+# in Cargo.toml. When bumping one, bump the other.
+[toolchain]
+channel = "1.95.0"
+components = ["rustfmt", "clippy"]

@@ -1,0 +1,31 @@
+[package]
+name = "cargo-quad-apk"
+version = "0.2.0"
+authors = [
+    "Pierre Krieger <pierre.krieger1708@gmail.com>",
+    "Philip Alldredge <philip@philipalldredge.com>",
+    "Fedor Logachev <not.fl3@gmail.com>",
+]
+license = "MIT OR Apache-2.0"
+description = "Cargo subcommand that builds Android packages for miniquad/macroquad projects (Rust 2024 compatible fork)"
+repository = "https://github.com/hoklims/cargo-quad-apk"
+edition = "2024"
+rust-version = "1.95"
+
+[dependencies]
+# `cargo` is used as a *library*. Its internal API is NOT stable and is tightly
+# coupled to the rustc/toolchain version: crate `cargo 0.N` matches Rust `1.N`.
+# Keep this pin in lock-step with `rust-toolchain.toml` (see README).
+cargo = "=0.95.0"
+cargo-util = "0.2"
+clap = "4.5.4"
+itertools = "0.8.2"
+dirs = "2.0.2"
+anyhow = "1.0"
+multimap = "0.8.0"
+serde = "1.0.104"
+toml = "0.5.5"
+glob = "0.3"
+
+[dev-dependencies]
+assert_cmd = "0.12.0"

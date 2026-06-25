@@ -1,0 +1,11 @@
+# Rust build artifacts
+/target
+**/*.rs.bk
+
+# Claude Code local cache
+/.claude
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.swp
